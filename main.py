@@ -72,7 +72,8 @@ def pickValAndProp(new_pos,sudoku,r,ste_Hsh):
         tried = set()
         noOfStates = len(ste_Hsh)
         i = 0
-
+        if(new_pos == [-1,-1]):
+            return (-1,-1)
         while noOfStates == len(ste_Hsh):
 
             val = r[1][new_pos[1]][i]
@@ -91,26 +92,41 @@ def pickValAndProp(new_pos,sudoku,r,ste_Hsh):
         r[1][new_pos[1]].remove(val)
         #remove from row
         r[2][new_pos[0]].remove(val)
-                
+        #print("no of states",noOfStates)       
         return (sudoku,r)
     except:
         return (-1,-1)
     
 def findNewPos(sudoku,r):
     new_pos = [-1,-1]
-    no_r = 100
+    no_r = 10
+    deg_h = 100
     for i in range(sudoku.shape[0]):
         for j in range(sudoku.shape[1]):
             if sudoku[i][j] == 0:
-                rmng = len(r[0][locateSquareOfPos(new_pos,sudoku)])\
-                +len(r[1][j]) + len(r[2][i])
-                
-                if rmng < no_r:
-                    no_r = rmng
+                common = np.intersect1d(r[0][locateSquareOfPos([i,j],sudoku)]\
+                    ,np.intersect1d(r[2][i],r[1][j]))
+                if len(common) == 0:
+                    return [-1,-1]
+                if len(common) < no_r:
+                    no_r = len(common)
+
+                    deg_h = len(r[0][locateSquareOfPos(new_pos,sudoku)])\
+                    +len(r[1][j]) + len(r[2][i])
+
                     new_pos = [i,j]
+                    
+                elif len(common) == no_r:
+
+                    rmng = len(r[0][locateSquareOfPos(new_pos,sudoku)])\
+                    +len(r[1][j]) + len(r[2][i])
+
+                    if rmng < deg_h:
+                        deg_h = rmng
+                        new_pos = [i,j]
+
     return new_pos
 
-    
 def sudoku_solver(sudoku):
     states = []
     ste_Hsh = set()
@@ -128,10 +144,13 @@ def sudoku_solver(sudoku):
             sudoku, r  = pickValAndProp(findNewPos(sudoku,r),sudoku.copy(),r,ste_Hsh) 
         else:
             try:
+                visited[novisited] = True
                 novisited = len(visited) - visited[::-1].index(False) -1
+                sudoku = states[novisited]
+                r = findRemaining(sudoku)
             except:
                 break
-            sudoku = states[novisited]
+            
         if isinstance(sudoku,int):
             visited[novisited] = True
             try:
