@@ -177,7 +177,7 @@ SKIP_TESTS = False
 
 if not SKIP_TESTS:
     import time
-    difficulties = [#'very_easy', 'easy','medium',\
+    difficulties = ['very_easy', 'easy','medium',\
      'hard']
 
     for difficulty in difficulties:
