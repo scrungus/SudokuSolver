@@ -1,5 +1,5 @@
 import numpy as np
-
+import scipy.stats as s
 # Load sudokus
 sudoku = np.load("data/very_easy_puzzle.npy")
 print("very_easy_puzzle.npy has been loaded into the variable sudoku")
@@ -18,6 +18,8 @@ print("Solution of first sudoku:")
 print(solutions[0])
 
 import random
+import xxhash
+
 
 def findSquares(sudoku):
     sqrs = []
@@ -70,6 +72,7 @@ def pickValAndProp(new_pos,sudoku,r,ste_Hsh):
     try:
         val = 0
         tried = set()
+        x = xxhash.xxh32()
         noOfStates = len(ste_Hsh)
         i = 0
         if(new_pos == [-1,-1]):
@@ -79,7 +82,9 @@ def pickValAndProp(new_pos,sudoku,r,ste_Hsh):
             val = r[1][new_pos[1]][i]
             if val in r[0][locateSquareOfPos(new_pos,sudoku)] and val in r[2][new_pos[0]]:
                 sudoku[new_pos[0]][new_pos[1]] = val
-                ste_Hsh.add(str(sudoku))
+                x.update(sudoku)
+                ste_Hsh.add(x.digest())
+                x.reset()
             else:
                 tried.add(val)
                 
@@ -96,11 +101,11 @@ def pickValAndProp(new_pos,sudoku,r,ste_Hsh):
         return (sudoku,r)
     except:
         return (-1,-1)
-    
+
 def findNewPos(sudoku,r):
     new_pos = [-1,-1]
     no_r = 10
-    deg_h = 100
+    deg_h = 0
     for i in range(sudoku.shape[0]):
         for j in range(sudoku.shape[1]):
             if sudoku[i][j] == 0:
@@ -121,56 +126,70 @@ def findNewPos(sudoku,r):
                     rmng = len(r[0][locateSquareOfPos(new_pos,sudoku)])\
                     +len(r[1][j]) + len(r[2][i])
 
-                    if rmng < deg_h:
+                    if rmng > deg_h:
                         deg_h = rmng
                         new_pos = [i,j]
 
     return new_pos
 
+def possible(sudoku):
+    for i in range(sudoku.shape[1]):
+        if any(x>1 for x in np.unique(sudoku[:, i],return_counts=True)[1][1:]):
+            return False
+        if any(x>1 for x in np.unique(sudoku[i,:],return_counts=True)[1][1:]):
+            return False
+    for sqr in findSquares(sudoku):
+        if any(x>1 for x in np.unique(sqr[0],return_counts=True)[1][1:]):
+            return False
+    return True
+
 def sudoku_solver(sudoku):
     states = []
     ste_Hsh = set()
+    x = xxhash.xxh32()
     visited = []
     novisited = 0
     states.append(sudoku)
     ste_Hsh.add(str(sudoku))
     visited.append(False)
     r = findRemaining(sudoku)
-    while not all(visited):
-        if isSolved(sudoku):
-            return sudoku
-        
-        if not visited[novisited]:
-            sudoku, r  = pickValAndProp(findNewPos(sudoku,r),sudoku.copy(),r,ste_Hsh) 
-        else:
-            try:
+    if possible(sudoku):      
+        while not all(visited):
+            if isSolved(sudoku):
+                    return sudoku
+            if not visited[novisited]:
+                sudoku, r  = pickValAndProp(findNewPos(sudoku,r),sudoku.copy(),r,ste_Hsh) 
+            else:
+                try:
+                    visited[novisited] = True
+                    novisited = len(visited) - visited[::-1].index(False) -1
+                    sudoku = states[novisited]
+                    r = findRemaining(sudoku)
+                except:
+                    break
+                
+            if isinstance(sudoku,int):
                 visited[novisited] = True
-                novisited = len(visited) - visited[::-1].index(False) -1
+                try:
+                    novisited = len(visited) - visited[::-1].index(False) -1
+                except:
+                    break
                 sudoku = states[novisited]
                 r = findRemaining(sudoku)
-            except:
-                break
+                continue
+            x.update(sudoku)
+            ste_Hsh.add(x.digest())
+            x.reset()
+            if len(ste_Hsh) > len(states):
+                if novisited == len(states)-1:
+                    states.append(sudoku)
+                    visited.append(False)
+                else:
+                    states[novisited+1] = sudoku
+                    visited[novisited+1] = False
+                novisited += 1
+                
             
-        if isinstance(sudoku,int):
-            visited[novisited] = True
-            try:
-                novisited = len(visited) - visited[::-1].index(False) -1
-            except:
-                break
-            sudoku = states[novisited]
-            r = findRemaining(sudoku)
-            continue
-        ste_Hsh.add(str(sudoku))
-        if len(ste_Hsh) > len(states):
-            if novisited == len(states)-1:
-                states.append(sudoku)
-                visited.append(False)
-            else:
-                states[novisited+1] = sudoku
-                visited[novisited+1] = False
-            novisited += 1
-            
-        
     return np.full((9,9),-1,dtype=int)
 
 SKIP_TESTS = False
@@ -179,7 +198,9 @@ if not SKIP_TESTS:
     import time
     difficulties = ['very_easy', 'easy','medium',\
      'hard']
-
+    total = 0
+    totalcor = 0
+    times = []
     for difficulty in difficulties:
         print(f"Testing {difficulty} sudokus")
         
@@ -187,6 +208,7 @@ if not SKIP_TESTS:
         solutions = np.load(f"data/{difficulty}_solution.npy")
         
         count = 0
+        
         for i in range(len(sudokus)):
             sudoku = sudokus[i].copy()
             print(f"This is {difficulty} sudoku number", i)
@@ -208,7 +230,10 @@ if not SKIP_TESTS:
                 print(solutions[i])
             
             print("This sudoku took", end_time-start_time, "seconds to solve.\n")
-
+            times.append(end_time-start_time)
+        total += len(sudokus)
+        totalcor += count
         print(f"{count}/{len(sudokus)} {difficulty} sudokus correct")
+        print("Average Time : ",s.trim_mean(times,0.1))
         if count < len(sudokus):
             break
