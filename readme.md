@@ -59,6 +59,26 @@ The chooser function (pickValAndProp) is the function which populates the cell p
 #### Implementation
 This function is fairly simple. It iterates through the intersection of the arrays in 'r' for the row/col/square of the picked cell, assigns it to the board, and hashes the board. If the board is unique (i.e if it hasn't been tried before), the function returns it. If there is no unique board, the function returns a failure value, whereafter backtracking is triggered in the main function (sudoku_solver)
 
+## **Efficiency Improvements and Results**
+
+#### Hashing Method 
+In an effort to make the main algorithm more efficient, I switched from converting the sudoku board to a string and hashing, to a more efficient hashing library xxhash. Needless to say, because of the size of the data, this made little difference
+
+#### Checking if Boards are Possible
+Until recently, I didn't realise that possible boards that can be given as input could contain duplicate values. I implemented a quick check before beginning the main algorithm to catch these cases. 
+
+#### Results 
+Overall, with all the efficiency improvements it has been possible to make given the way I set out my solution to this problem, these are the statistics: 
+
+Avg Case (Excluding Outliers) : 0.41 secs
+Max Case : 21.3 secs
+Min Case : 0.001 secs
+
+These are clearly not ideal results. Whilst the average time is not bad, the longest puzzle (Hard Sudoku 14) is uncomfortably close to the 30 second limit. I will explain the reasons for these results in my evaluation. 
+
+## **Evaluation**
+
+
 
 
 

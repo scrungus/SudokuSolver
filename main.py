@@ -89,7 +89,7 @@ def pickValAndProp(new_pos,sudoku,r,ste_Hsh):
                 break
         if(noOfStates == len(ste_Hsh)):
             return (-1,-1)
-            
+
         #remove from square
         r[0][locateSquareOfPos(new_pos,sudoku)].remove(val)
         #remove from col 
@@ -234,5 +234,7 @@ if not SKIP_TESTS:
         totalcor += count
         print(f"{count}/{len(sudokus)} {difficulty} sudokus correct")
         print("Average Time : ",s.trim_mean(times,0.1))
+        print("Max : ", max(times) )
+        print("Min : ",min(times))
         if count < len(sudokus):
             break
