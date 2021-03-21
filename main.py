@@ -77,20 +77,19 @@ def pickValAndProp(new_pos,sudoku,r,ste_Hsh):
         i = 0
         if(new_pos == [-1,-1]):
             return (-1,-1)
-        while noOfStates == len(ste_Hsh):
-
-            val = r[1][new_pos[1]][i]
-            if val in r[0][locateSquareOfPos(new_pos,sudoku)] and val in r[2][new_pos[0]]:
-                sudoku[new_pos[0]][new_pos[1]] = val
-                x.update(sudoku)
-                ste_Hsh.add(x.digest())
-                x.reset()
-            else:
-                tried.add(val)
-                
-                if(len(tried) == len(r[1][new_pos[1]])):
-                    return (-1,-1)
-            i+=1    
+        common = np.intersect1d(r[0][locateSquareOfPos([new_pos[0],new_pos[1]],sudoku)]\
+                    ,np.intersect1d(r[2][new_pos[0]],r[1][new_pos[1]]))
+            
+        for val in common:
+            sudoku[new_pos[0]][new_pos[1]] = val
+            x.update(sudoku)
+            ste_Hsh.add(x.digest())
+            x.reset()
+            if(noOfStates < len(ste_Hsh)):
+                break
+        if(noOfStates == len(ste_Hsh)):
+            return (-1,-1)
+            
         #remove from square
         r[0][locateSquareOfPos(new_pos,sudoku)].remove(val)
         #remove from col 

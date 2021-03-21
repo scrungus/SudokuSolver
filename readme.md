@@ -47,6 +47,17 @@ Before writing my functions to pick new positions on the board and populate them
 I decided at the time that the best way to populate the board, was to have one function handling finding new positions, and another function to choose the value to enter there. These are what I have been referring to as the 'picker/chooser' functions respectively. 
 There were significant limitations to this design choice, which I will discuss later. 
 
+#### Implementation
+First we iterate through the entire board. Again, my naiive approach was just a heuristic I made up (Although this turned out to be a degree heuristic used incorrectly), Which was to take the lengths of the remaining values for the row/col/square of that cell and sum them. This value was compared to the value for the current best cell, and if it was smaller, then the best cell was updated. 
+
+Of course, this was a fairly useless heuristic, since it was essentially finding the variable that affected the least other variables ; a reverse-degree heuristic. 
+
+Once I figured this out, I changed my heuristic to the MRV (Minimum Remaining Values), by taking the length of the , and updating the current best cell if this new value was less than the old. I then used the reversed-reverse-degree heuristic (i.e. the normal degree heuristic) as a tiebreaker for when there were cells with the same MRV.
+
+#### Chooser function
+The chooser function (pickValAndProp) is the function which populates the cell picked by the picker function (findNewPos) with a possible value.
+#### Implementation
+This function is fairly simple. It iterates through the intersection of the arrays in 'r' for the row/col/square of the picked cell, assigns it to the board, and hashes the board. If the board is unique (i.e if it hasn't been tried before), the function returns it. If there is no unique board, the function returns a failure value, whereafter backtracking is triggered in the main function (sudoku_solver)
 
 
 
