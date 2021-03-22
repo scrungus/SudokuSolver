@@ -81,7 +81,7 @@ Once I had a working solver that could solve any sudoku given to it, I started l
 
 I figured this was because whilst my constraint propogation was working in the sense that it only input valid numbers on cells, it was not able to detect cross-constraint compatibility, which I will illustrate with an example. 
 
-When trying to improve speed, I decided to look at techniques a human would use to eliminate possibilites from a cell. I found this example : 
+When trying to improve speed, I decided to look at techniques a human would use to eliminate possibilites from a cell. I found this example[1] : 
 
 ![](board.png)
 
@@ -90,6 +90,10 @@ As illustrated in this example, 7 must be placed in one of the highlighted red c
 I realised this was a fundamental design flaw with the way I was modelling the board. Because my picker and chooser functions were separated, and because I found valid positions by intersecting the row/col/square of that cell and not by directly assigning possible values to each cell, there is no way for my algorithm to detect that 7 is only possible in the highlighted cells and not in the rest of the row. As a result, I realised I could not make any real speed improvements to my solution, without the ability to cross-examine constraints in this manner. 
 
 Moving forward, if I were to reimplement this solver, I would most likely go for a dictionary-based approach, as this would allow me to be more granular and improve the quality of my heuristics. 
+
+#### References
+
+[1] https://www.kristanix.com/sudokuepic/sudoku-solving-techniques.php
 
 
 
