@@ -83,7 +83,7 @@ I figured this was because whilst my constraint propogation was working in the s
 
 When trying to improve speed, I decided to look at techniques a human would use to eliminate possibilites from a cell. I found this example : 
 
-![](board.png)
+![](board.png#center)
 
 
 
