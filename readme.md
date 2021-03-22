@@ -43,14 +43,14 @@ Before writing my functions to pick new positions on the board and populate them
 
  When we need to backtrack, the element at the current index in the visited array is set to True. the new index is set by finding the last occurring 'False' value in the 'visited' array, and setting the current board to the corresponding state at the same index of the 'states' array. 
 
- ### Finding the Next Position
+ ### Picker function 
 I decided at the time that the best way to populate the board, was to have one function handling finding new positions, and another function to choose the value to enter there. These are what I have been referring to as the 'picker/chooser' functions respectively. 
 There were significant limitations to this design choice, which I will discuss later. 
 
 #### Implementation
 First we iterate through the entire board. Again, my naiive approach was just a heuristic I made up (Although this turned out to be a degree heuristic used incorrectly), Which was to take the lengths of the remaining values for the row/col/square of that cell and sum them. This value was compared to the value for the current best cell, and if it was smaller, then the best cell was updated. 
 
-Of course, this was a fairly useless heuristic, since it was essentially finding the variable that affected the least other variables ; a reverse-degree heuristic. 
+Of course, this was a fairly useless heuristic, since it was essentially finding the variable that affected the least other variables; a reverse-degree heuristic. 
 
 Once I figured this out, I changed my heuristic to the MRV (Minimum Remaining Values), by taking the length of the , and updating the current best cell if this new value was less than the old. I then used the reversed-reverse-degree heuristic (i.e. the normal degree heuristic) as a tiebreaker for when there were cells with the same MRV.
 
@@ -65,7 +65,7 @@ This function is fairly simple. It iterates through the intersection of the arra
 In an effort to make the main algorithm more efficient, I switched from converting the sudoku board to a string and hashing, to a more efficient hashing library xxhash. Needless to say, because of the size of the data, this made little difference
 
 #### Checking if Boards are Possible
-Until recently, I didn't realise that possible boards that can be given as input could contain duplicate values. I implemented a quick check before beginning the main algorithm to catch these cases. 
+Until recently, I didn't realise that possible boards that can be given as input could contain duplicate values within a constraint (i.e. duplicate numbers in a row). I implemented a quick check before beginning the main algorithm to catch these cases. 
 
 #### Results 
 Overall, with all the efficiency improvements it has been possible to make given the way I set out my solution to this problem, these are the statistics: 
@@ -77,6 +77,14 @@ Min Case : 0.001 secs
 These are clearly not ideal results. Whilst the average time is not bad, the longest puzzle (Hard Sudoku 14) is uncomfortably close to the 30 second limit. I will explain the reasons for these results in my evaluation. 
 
 ## **Evaluation**
+Once I had a working solver that could solve any sudoku given to it, I started looking for ways to improve speed. I knew from my results (Hard Sudoku 14 taking over 20 seconds to solve when it is unsolvable), that my main issue was early failure detection. 
+
+I figured this was because whilst my constraint propogation was working in the sense that it only input valid numbers on cells, it was not able to detect cross-constraint compatibility, which I will illustrate with an example. 
+
+When trying to improve speed, I decided to look at techniques a human would use to eliminate possibilites from a cell. I found this example : 
+
+![](board.png)
+
 
 
 
