@@ -6,19 +6,19 @@ I decided on a backtracking with constraint satisfaction algorithm, and I began 
 
 ## **Board Model**
 
-#### Board Checker
+### Board Checker
 Initially, since I did not fully understand how to solve this problem, I started off writing a function (isSolved) to detect whether the board was in a solved state. 
 
 #### Implementation
 This was done by checking for 0's, and then checking whether each row/column/square(3x3 section) did not have any duplicate elements.
 
-#### Tracking Squares
+### Tracking Squares
 I then needed to implement a function to find the 3x3 sections (hereafter referred to as 'squares') of the board, as this was necessary for the isSolved function. 
 
 #### Implementation
 This was done by iterating over the board at an increment of 3, and then populating an array with tuples of both the square array, and an array of the 4 indexes that defined the bound of the respective square (this would become useful later). Later on, I discovered that I would need an accompanying function to this called locateSquareOfPos, to find the square for a given cell in the board.
 
-#### Tracking Unassigned Variables and Possible Values
+### Tracking Unassigned Variables and Possible Values
 The final component I needed to complete my board model (or board state representation) was a way of tracking which variables (cells) in the board were unassigned, and which values were possible in these. 
 
 #### Implementation
@@ -30,7 +30,7 @@ Once I had my model of the board, I could begin to write an algorithm to solve i
 
 ## **Solving Algorithm**
 
-#### Backtracking 
+### Backtracking 
 Before writing my functions to pick new positions on the board and populate them, I started off with backtracking. In retrospect, it would've made more sense to implement the former functions first, since the easier sudokus can be solved without backtracking, however I did not know about this initially. 
 
 #### Implementation
@@ -43,7 +43,7 @@ Before writing my functions to pick new positions on the board and populate them
 
  When we need to backtrack, the element at the current index in the visited array is set to True. the new index is set by finding the last occurring 'False' value in the 'visited' array, and setting the current board to the corresponding state at the same index of the 'states' array. 
 
- #### Finding the Next Position
+ ### Finding the Next Position
 I decided at the time that the best way to populate the board, was to have one function handling finding new positions, and another function to choose the value to enter there. These are what I have been referring to as the 'picker/chooser' functions respectively. 
 There were significant limitations to this design choice, which I will discuss later. 
 
@@ -54,7 +54,7 @@ Of course, this was a fairly useless heuristic, since it was essentially finding
 
 Once I figured this out, I changed my heuristic to the MRV (Minimum Remaining Values), by taking the length of the , and updating the current best cell if this new value was less than the old. I then used the reversed-reverse-degree heuristic (i.e. the normal degree heuristic) as a tiebreaker for when there were cells with the same MRV.
 
-#### Chooser function
+### Chooser function
 The chooser function (pickValAndProp) is the function which populates the cell picked by the picker function (findNewPos) with a possible value.
 #### Implementation
 This function is fairly simple. It iterates through the intersection of the arrays in 'r' for the row/col/square of the picked cell, assigns it to the board, and hashes the board. If the board is unique (i.e if it hasn't been tried before), the function returns it. If there is no unique board, the function returns a failure value, whereafter backtracking is triggered in the main function (sudoku_solver)
