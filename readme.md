@@ -83,9 +83,13 @@ I figured this was because whilst my constraint propogation was working in the s
 
 When trying to improve speed, I decided to look at techniques a human would use to eliminate possibilites from a cell. I found this example : 
 
-![](board.png#center)
+![](board.png)
 
+As illustrated in this example, 7 must be placed in one of the highlighted red cells, as it is not allowed in the centre column. My algorithm would detect that 7 could be placed in either of these cells, however it would also try placing them in any of the other cells marked with a cross in the same row, since these would still be valid. 
 
+I realised this was a fundamental design flaw with the way I was modelling the board. Because my picker and chooser functions were separated, and because I found valid positions by intersecting the row/col/square of that cell and not by directly assigning possible values to each cell, there is no way for my algorithm to detect that 7 is only possible in the highlighted cells and not in the rest of the row. As a result, I realised I could not make any real speed improvements to my solution, without the ability to cross-examine constraints in this manner. 
+
+Moving forward, if I were to reimplement this solver, I would most likely go for a dictionary-based approach, as this would allow me to be more granular and improve the quality of my heuristics. 
 
 
 
